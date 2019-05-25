@@ -17,7 +17,7 @@ namespace ActivityCenter.Models
         [EmailAddress]
         public string Email {get;set;}
         [Required(ErrorMessage="You need a password to register!")]
-        [RegularExpression("^(?=.*[A-Za-z])(?=.*[0-9])(?=.*[@$!%*#?&])[A-Za-z[0-9]@$!%*#?&]{8,}$",ErrorMessage="Password must contain atleast 1 number, 1 letter, and 1 special character.")]   
+        [RegularExpression("^(?=.{8,}$)(?=.*?[A-Za-z])(?=.*?[0-9])(?=.*?[!@#$%^&*()]).*$",ErrorMessage="Password must contain at least 1 number, 1 letter, and 1 special character and 8 characters long.")]   
         [DataType(DataType.Password)]
         public string Password {get;set;}
         [NotMapped]

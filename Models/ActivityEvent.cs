@@ -9,7 +9,7 @@ namespace ActivityCenter.Models
     public class ActivityEvent
     {
         [Key]
-        public int ActvityEventId {get; set;}
+        public int ActivityEventId {get; set;}
         [Required(ErrorMessage="A Name is required")]
         public string ActivityName {get; set;}
         [Required(ErrorMessage="An Activity start time is required")]
@@ -17,7 +17,7 @@ namespace ActivityCenter.Models
         [DataType(DataType.DateTime)]
         public DateTime ActivityStart {get; set;}
         [Required(ErrorMessage="An Activity duration is required")]
-        [DataType(DataType.Duration)]
+        [MinVal]
         public int ActivityDuration {get; set;}
         [Required(ErrorMessage="An Activity description is required")]
         public string ActivityDescription {get; set;}

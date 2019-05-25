@@ -1,6 +1,7 @@
 <div class="container">
     <div class="form-group">
         <h1>Welcome to the Activity Planner</h1>
+        <h3>Welcome @ViewBag.User.Name</h3>
         <a href="logout">Logout</a>
     </div>
     <table class="table">
@@ -15,41 +16,43 @@
             </tr>
         </thead>
         <tbody>
-            @foreach(var event in ViewBag.Activities)
+            @{
+                foreach(var e in ViewBag.Activities)
                 {
                     bool Attending = false;
-                    foreach(var join in event.Attendees)
+                    foreach(var j in e.Attendees)
                     {
-                        if(join.User == ViewBag.User)
+                        if(j.AUser == ViewBag.User)
                         {
                             Attending = true;
                         }
                     }
-                    if(event.ActivityStart < DateTime.Now)
+                    if(e.ActivityStart > DateTime.Now)
                     {
                         <tr>
-                            <td><a href="/@event.ActivityEventId">@event.ActivityName</a></td>
-                            <td>@event.ActivityStart</td>
-                            <td>@event.ActivityDuration</td>
-                            <td>@event.Coordinator</td>
-                            <td>@event.Attendees.Count</td>
-                                @{
-                                if(event.Coordinator.UserId == ViewBag.User.UserId && Attending)
+                            <td><a href="/@e.ActivityEventId">@e.ActivityName</a></td>
+                            <td>@e.ActivityStart</td>
+                            <td>@e.ActivityDuration</td>
+                            <td>@e.Coordinator.Name</td>
+                            <td>@e.Attendees.Count</td>
+                            @{
+                                if(e.Coordinator.UserId == ViewBag.User.UserId && Attending)
                                 {
-                                    <td><a href="/delete/@event.ActivityEventId">Delete</a></td>
+                                    <td><a href="/delete/@e.ActivityEventId">Delete</a></td>
                                 }
-                                else if(Attending && event.Coordinator.UserId != ViewBag.User.UserId)
+                                else if(Attending && e.Coordinator.UserId != ViewBag.User.UserId)
                                 {
-                                    <td><a href="/leave/@event.ActivityEventId/@ViewBag.User.UserId">Leave</a></td>
+                                    <td><a href="/leave/@e.ActivityEventId/@ViewBag.User.UserId">Leave</a></td>
                                 }
                                 else
                                 {
-                                    <td><a href="/join/@event.ActivityEventId/@ViewBag.User.UserId">Join</a></td>
+                                    <td><a href="/join/@e.ActivityEventId/@ViewBag.User.UserId">Join</a></td>
                                 }
-                                }
+                            }
                         </tr>
                     }
                 }
+            }
         </tbody>
     </table>
 <button class="btn btn-info"><a href="new">Add an Event!</a></button>

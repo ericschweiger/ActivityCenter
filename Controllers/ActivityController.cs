@@ -36,6 +36,7 @@ namespace ActivityCenter.Controllers
                 if(dbUser != null)
                 {
                     ModelState.AddModelError("Email", "This Email is already in use");
+                    return View("Index");
                 }
                 else
                 {
@@ -44,7 +45,7 @@ namespace ActivityCenter.Controllers
                     context.UserList.Add(newUser);
                     context.SaveChanges();
                     HttpContext.Session.SetInt32("UserId", newUser.UserId);
-                    return Redirect("/home");
+                    return Redirect("home");
                 }
             }
             return View("Index");
@@ -59,6 +60,7 @@ namespace ActivityCenter.Controllers
                 if(user == null)
                 {
                     ModelState.AddModelError("LoginEmail", "This Email doesn't exist, please Register");
+                    return View("Index");
                 }
                 else
                 {
@@ -71,7 +73,7 @@ namespace ActivityCenter.Controllers
                     else
                     {
                         HttpContext.Session.SetInt32("UserId", user.UserId);
-                        return Redirect("/home");
+                        return Redirect("home");
                     }
                 }
             }
@@ -90,7 +92,7 @@ namespace ActivityCenter.Controllers
             {
                 User User = context.UserList.FirstOrDefault(x => x.UserId == HttpContext.Session.GetInt32("UserId"));
                 List<ActivityEvent> Activities = context.ActivityList.Include(x => x.Coordinator).Include(y => y.Attendees).ThenInclude(z => z.AUser).ToList();
-                ViewBag.Activities = Activities.OrderByDescending(z => z.ActivityStart);
+                ViewBag.Activities = Activities.OrderBy(z => z.ActivityStart);
                 ViewBag.User = User;
                 return View();
             }
@@ -107,9 +109,17 @@ namespace ActivityCenter.Controllers
             else
             {
                 User User = context.UserList.FirstOrDefault(x => x.UserId == HttpContext.Session.GetInt32("UserId"));
-                ActivityEvent Event = context.ActivityList.Include(x => x.Coordinator).Include(y => y.Attendees).ThenInclude(z => z.AUser).FirstOrDefault(w => w.ActvityEventId == activityId);
+                ActivityEvent Event = context.ActivityList.Include(x => x.Coordinator).Include(y => y.Attendees).ThenInclude(z => z.AUser).FirstOrDefault(w => w.ActivityEventId == activityId);
                 ViewBag.ActivityEvent = Event;
                 ViewBag.User = User;
+                
+                List<Join> userAttending = context.Joiners.Where(a => a.UserId == User.UserId).Include(r => r.ActivityEvent).ToList();
+                List<int> attendingIds = new List<int>();
+                foreach (Join r in userAttending)
+                {
+                    attendingIds.Add(r.ActivityEventId);
+                }
+                ViewBag.UserAttending = attendingIds;
                 return View();
             }
         }
@@ -139,11 +149,11 @@ namespace ActivityCenter.Controllers
                 newEvent.UserID = (int)HttpContext.Session.GetInt32("UserId");
                 context.ActivityList.Add(newEvent);
                 context.SaveChanges();
-                newJoin.ActivityEventId = newEvent.ActvityEventId;
+                newJoin.ActivityEventId = newEvent.ActivityEventId;
                 newJoin.UserId = newEvent.UserID;
                 context.Joiners.Add(newJoin);
                 context.SaveChanges();
-                return Redirect($"{newEvent.ActvityEventId}");
+                return Redirect($"{newEvent.ActivityEventId}");
             }
             else
             {
@@ -154,7 +164,7 @@ namespace ActivityCenter.Controllers
         [HttpGet("delete/{activityId}")]
         public IActionResult Delete(int activityId)
         {
-            ActivityEvent Event = context.ActivityList.FirstOrDefault(x => x.ActvityEventId == activityId);
+            ActivityEvent Event = context.ActivityList.FirstOrDefault(x => x.ActivityEventId == activityId);
             context.ActivityList.Remove(Event);
             context.SaveChanges();
             return RedirectToAction("Home");
@@ -171,7 +181,7 @@ namespace ActivityCenter.Controllers
             return RedirectToAction("Home");
         }
 
-        [HttpGet("leave/{eventId}/{userId")]
+        [HttpGet("leave/{eventId}/{userId}")]
         public IActionResult Leave(int eventId, int userId)
         {
             Join Leave = context.Joiners.FirstOrDefault(x => x.ActivityEventId == eventId && x.UserId == userId);
